@@ -12,9 +12,8 @@ class Board:
             'B': Bishop,
         }
         self.board = self.setup_board()
-
+        self.move_log = [] # Lịch sử nước đi có định dạng như sau: ((x1, y1), (x2, y2), piece)
         self.turn = "white"
-        self.last_move = None
 
     def __str__(self):
         # Chuyển trạng thái bàn cờ thành một chuỗi dễ đọc
