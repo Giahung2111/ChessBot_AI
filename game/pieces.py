@@ -3,7 +3,7 @@ from board import Board
 
 class Pieces:
     def __init__(self, position: list[int], color: str):
-        self.position = position
+        self.position = tuple(position)
         self.color = color
 
     @abstractmethod
@@ -15,7 +15,7 @@ class Pieces:
         pass 
 
     def move(self, new_position):
-        self.position = new_position
+        self.position = tuple(new_position)
 
 class King(Pieces):
     def get_valid_moves(self, board: Board):

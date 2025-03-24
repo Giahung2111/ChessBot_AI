@@ -12,7 +12,11 @@ class MoveGenerator():
             for col in range(8):
                 piece = self.board.board[row][col]
                 if piece and piece.color == self.board.turn:
-                    valid_moves = piece.get_valid_moves(self.board, self.board.move_log[-1])
+                    if len(self.board.move_log) == 0:
+                        last_move = None 
+                    else:
+                        last_move = self.board.move_log[-1]
+                    valid_moves = piece.get_valid_moves(self.board, last_move)
                     for move in valid_moves:
                         if self.is_move_legal(piece, move):
                             legal_moves.append((piece.position, move))
@@ -31,8 +35,8 @@ class MoveGenerator():
         temp_board.board[x_old][y_old] = None
 
         # Lưu vị trí cũ và cập nhật tạm thời nếu là vua
-        old_position = piece.position[:]
-        piece.position = [x_new, y_new]
+        old_position = piece.position
+        piece.position = (x_new, y_new)  # Dùng tuple thay vì list
 
         # Kiểm tra chiếu
         in_check = self.is_in_check(temp_board, self.board.turn)
