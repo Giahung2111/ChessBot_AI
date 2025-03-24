@@ -9,9 +9,6 @@ chess_bot_game/
 ├── bots/                     # Contains AI bot algorithms
 │   ├── __init__.py
 │   ├── base_bot.py           # Base class for all bots
-│   ├── easy_bot.py           # Easy difficulty bot
-│   ├── medium_bot.py         # Medium difficulty bot
-│   ├── hard_bot.py           # Hard difficulty bot
 ├── game/                     # Contains the main game logic
 │   ├── __init__.py
 │   ├── board.py              # Manages the game board and moves

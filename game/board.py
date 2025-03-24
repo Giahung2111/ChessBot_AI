@@ -47,3 +47,35 @@ class Board:
         return legal_moves
 
     # Hàm đổi lượt
+    def switch_turns(self):
+        if self.turn == "white":
+            self.turn = "black"
+        else:
+            self.turn = "white"
+
+    # Hàm tạo trạng thái từ 1 nước đi hợp lệ
+    def generate_state_from_a_valid_move(self, move):
+        pre_x, pre_y = move[0]  # Vị trí cũ
+        new_x, new_y = move[1]  # Vị trí mới
+        
+        # Lấy quân cờ từ vị trí cũ
+        piece = self.board[pre_x][pre_y]
+        
+        # Di chuyển quân cờ sang vị trí mới
+        self.board[new_x][new_y] = piece
+        self.board[pre_x][pre_y] = None  # Xóa ô cũ
+        
+        # Cập nhật thuộc tính position của quân cờ
+        piece.move((new_x, new_y))
+
+    # Tạo tất cả trạng thái có thể xảy ra
+    def generate_all_states(self, board):
+        legal_states = []
+        legal_moves = []
+        legal_moves = self.get_legal_moves()
+        for move in legal_moves:
+            state = self.generate_state_from_a_valid_move(move)
+            legal_states += state
+        return legal_states
+
+
