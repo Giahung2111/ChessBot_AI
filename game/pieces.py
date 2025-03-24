@@ -14,7 +14,11 @@ class Pieces:
     def __str__(self):
         pass 
 
-    def move(self, new_position):
+    def move(self, new_position, board: Board):
+        pre_x, pre_y = self.position
+        new_x, new_y = new_position
+        board.board[new_x][new_y] = self
+        board.board[pre_x][pre_y] = None
         self.position = tuple(new_position)
 
 class King(Pieces):

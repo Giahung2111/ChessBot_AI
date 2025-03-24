@@ -1,15 +1,12 @@
+from game.alpha_beta import AlphaBeta
+
 class Bot:
-    def __init__(self):
-        pass
+    def __init__(self, level):
+        # Chiều cao duyệt cây (Tương ứng với độ khó của bot)
+        self.level = level
 
     def make_move(self, board):
-        """
-        This method should be overridden by subclasses to implement specific move strategies.
-        """
-        raise NotImplementedError("Subclasses should implement this method.")
-
-    def evaluate_board(self, board):
-        """
-        This method should be overridden by subclasses to implement specific evaluation strategies.
-        """
-        raise NotImplementedError("Subclasses should implement this method.")
+        ab = AlphaBeta(self.level)
+        best_move, score = ab.find_best_move(board)
+        print(f"Nước đi tốt nhất: {best_move}, Điểm: {score}")
+        # Bổ sung thêm di chuyển sau này (Nhắc nhở)
