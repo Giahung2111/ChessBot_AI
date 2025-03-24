@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
 class Pieces:
-    def __init__(self, position: list[int]):
+    def __init__(self, position: list[int], color: str):
         self.position = position
-        self.color = None
+        self.color = color
 
     @abstractmethod
     def get_valid_moves(self, board):
@@ -12,6 +12,9 @@ class Pieces:
     @abstractmethod
     def __str__(self):
         pass 
+
+    def move(self, new_position):
+        self.position = new_position
 
 class King(Pieces):
     def get_valid_moves(self, board):
@@ -123,40 +126,42 @@ class Knight(Pieces):
         return "♘"
 
 class Pawn(Pieces):
-    def get_valid_moves(self, board, last_move=None, player_perspective="white"):
+    def get_valid_moves(self, board, last_move=None):
         valid_moves = []
         x, y = self.position
 
-        # Xác định hướng di chuyển dựa vào góc nhìn của người chơi
-        if player_perspective == "white":
-            direction = -1 if self.color == "white" else 1  # Trắng đi lên, đen đi xuống
-            start_row = 6 if self.color == "white" else 1  # Hàng khởi đầu của quân chốt
-            promotion_row = 0 if self.color == "white" else 7  # Hàng để phong cấp
-        else:
-            direction = 1 if self.color == "white" else -1  # Trắng đi xuống, đen đi lên
-            start_row = 1 if self.color == "white" else 6
-            promotion_row = 7 if self.color == "white" else 0
+        # Xác định hướng và hàng đặc biệt dựa trên màu
+        if self.color == "white":
+            direction = -1  # Trắng đi lên (giảm số hàng)
+            start_row = 6   # Hàng bắt đầu của trắng
+            # promotion_row = 0  # Hàng phong cấp của trắng
+        else:  # self.color == "black"
+            direction = 1  # Đen đi xuống (tăng số hàng)
+            start_row = 1  # Hàng bắt đầu của đen
+            # promotion_row = 7  # Hàng phong cấp của đen
 
-        # Tiến một ô nếu không có quân cản đường
+        # 1. Tiến một ô nếu không bị chặn
         if 0 <= x + direction < 8 and board[x + direction][y] is None:
             valid_moves.append((x + direction, y))
-            # Tiến hai ô nếu đang ở vị trí ban đầu
+            # 2. Tiến hai ô nếu ở vị trí ban đầu và không bị chặn
             if x == start_row and board[x + 2 * direction][y] is None:
                 valid_moves.append((x + 2 * direction, y))
 
-        # Ăn quân chéo
+        # 3. Ăn chéo
         for dy in [-1, 1]:  # Chéo trái và phải
-            if 0 <= x + direction < 8 and 0 <= y + dy < 8:
-                target = board[x + direction][y + dy]
+            new_x, new_y = x + direction, y + dy
+            if 0 <= new_x < 8 and 0 <= new_y < 8:
+                target = board[new_x][new_y]
                 if target is not None and target.color != self.color:
-                    valid_moves.append((x + direction, y + dy))
+                    valid_moves.append((new_x, new_y))
 
-        # Bắt chốt qua đường (en passant)
+        # 4. Bắt chốt qua đường (en passant)
         if last_move:
             (prev_x, prev_y), (new_x, new_y), moved_piece = last_move
-            if isinstance(moved_piece, Pawn) and abs(prev_x - new_x) == 2:  # Chốt đi 2 ô
-                if new_x == x and abs(new_y - y) == 1:  # Đứng ngay cạnh quân vừa đi 2 ô
-                    valid_moves.append((x + direction, new_y))  # Ăn chéo qua đường
+            if (isinstance(moved_piece, Pawn) and 
+                abs(prev_x - new_x) == 2 and  # Đối phương vừa đi 2 ô
+                new_x == x and abs(new_y - y) == 1):  # Ngang hàng và cạnh nhau
+                valid_moves.append((x + direction, new_y))
 
         return valid_moves
 
@@ -182,6 +187,4 @@ class Pawn(Pieces):
     #     self.position = [x, y]
 
     def __str__(self):
-        if self.color == "white":
-            return "♟"
-        return "♙"
+        return "♟" if self.color == "white" else "♙"
