@@ -1,7 +1,7 @@
-from board import Board
+from game.board import Board
 from copy import deepcopy
 import math
-from pieces import King, Knight, Queen, Pawn, Rook, Bishop
+from game.pieces import King, Knight, Queen, Pawn, Rook, Bishop
 
 # Quy trình hoạt động:
 # 1. Duyệt tất cả các nước đi có thể thực hiện (board.get_legal_moves()).

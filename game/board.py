@@ -1,5 +1,5 @@
-from pieces import King, Knight, Queen, Pawn, Rook, Bishop
-from move_generator import MoveGenerator
+from game.pieces import King, Knight, Queen, Pawn, Rook, Bishop
+from game.move_generator import MoveGenerator
 from copy import deepcopy
 
 class Board:
@@ -72,5 +72,29 @@ class Board:
             legal_states.append(temp_board)  # Thêm bản sao vào danh sách
         return legal_states
 
+    def is_in_check(self, color):
+        # Tìm vị trí của vua
+        king_position = None
+        for row in range(8):
+            for col in range(8):
+                piece = self.board[row][col]
+                if isinstance(piece, King) and piece.color == color:
+                    king_position = (row, col)
+                    break
+            if king_position:
+                break
+        
+        if not king_position:
+            raise ValueError(f"Không tìm thấy vua của {color} trên bàn cờ!")
+        
+        # Kiểm tra xem có quân nào có thể ăn vua không
+        for row in range(8):
+            for col in range(8):
+                piece = self.board[row][col]
+                if piece and piece.color != color:
+                    valid_moves = piece.get_valid_moves(self)
+                    if king_position in valid_moves:
+                        return True
+        return False
 
 

@@ -1,5 +1,5 @@
+# game/pieces.py
 from abc import ABC, abstractmethod
-from board import Board
 
 class Pieces:
     def __init__(self, position: list[int], color: str):
@@ -7,14 +7,15 @@ class Pieces:
         self.color = color
 
     @abstractmethod
-    def get_valid_moves(self, board: Board):
+    def get_valid_moves(self, board, last_move=None):
         pass
 
     @abstractmethod
     def __str__(self):
         pass 
 
-    def move(self, new_position, board: Board):
+    def move(self, new_position, board):
+        from game.board import Board  # Import tại đây
         pre_x, pre_y = self.position
         new_x, new_y = new_position
         board.board[new_x][new_y] = self
@@ -22,7 +23,8 @@ class Pieces:
         self.position = tuple(new_position)
 
 class King(Pieces):
-    def get_valid_moves(self, board: Board):
+    def get_valid_moves(self, board, last_move=None):
+        from game.board import Board  # Import tại đây
         valid_moves = []
         x, y = self.position
         directions = [
@@ -31,21 +33,18 @@ class King(Pieces):
         ]
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
-            if 0 <= nx < 8 and 0 <= ny < 8:  # Trong bàn cờ
-                if (board.board[nx][ny] is None) or ( board.board[nx][ny] is not None and self.color != board.board[nx][ny].color):  # Ô chứa quân khác
+            if 0 <= nx < 8 and 0 <= ny < 8:
+                if (board.board[nx][ny] is None) or (board.board[nx][ny] is not None and self.color != board.board[nx][ny].color):
                     valid_moves.append((nx, ny))
         
-        # Kiểm tra nước đi đặc biệt: Nhập thành (Castling)
         available_castling = self.check_castling(board)
-        if available_castling == "a": # Có thể nhập thành cột a
+        if available_castling == "a":
             valid_moves.append((x, y - 2))
-        elif available_castling == "h": # Có thể nhập thành cột h
+        elif available_castling == "h":
             valid_moves.append((x, y + 2))
-        elif available_castling == "both": # Có thể nhập thành cả hai cột
+        elif available_castling == "both":
             valid_moves.append((x, y - 2))
             valid_moves.append((x, y + 2))
-        else: # Không thể nhập thành
-            pass
         return valid_moves
 
     def __str__(self):
@@ -53,27 +52,23 @@ class King(Pieces):
             return "♚"
         return "♔"
 
-    def check_castling(self, board: Board):
-        # Xác định vị trí ban đầu của Vua dựa trên màu
+    def check_castling(self, board):
+        from game.board import Board  # Import tại đây
         if self.color == "white":
             king_start = (7, 4)
             row = 7
-        else:  # black
+        else:
             king_start = (0, 4)
             row = 0
 
-        # Nếu Vua không ở vị trí ban đầu, không thể nhập thành
         if tuple(self.position) != king_start or self.is_square_attacked(board, king_start):
             return "no_castling"
-        
 
-        # Kiểm tra xem vua đã di chuyển chưa
         for log in board.move_log:
             (pre_x, pre_y), (new_x, new_y), piece = log
             if isinstance(piece, King) and self.color == piece.color:
                 return "no_castling"
         
-        # Kiểm tra xem xe đã di chuyển chưa
         rook_a_check = True
         rook_h_check = True
         for log in board.move_log:
@@ -86,13 +81,11 @@ class King(Pieces):
         if not rook_a_check and not rook_h_check:
             return "no_castling"
         
-        # Nhập thành bên cánh Hậu (queenside)
         if rook_a_check:
             for col in range(1, 4):
                 if board.board[row][col] is not None or self.is_square_attacked(board, (row, col)):
                     rook_a_check = False
 
-        # Nhập thành bên cánh Vua (kingside)
         if rook_h_check:
             for col in range(5, 7):
                 if board.board[row][col] is not None or self.is_square_attacked(board, (row, col)):
@@ -107,20 +100,20 @@ class King(Pieces):
         else:
             return "no_castling"
 
-    def is_square_attacked(self, board: Board, square: tuple):
-        """Kiểm tra xem ô có bị tấn công bởi quân đối phương không"""
-        for row in range(8):
-            for col in range(8):
-                piece = board.board[row][col]
-                if piece and piece.color != self.color:
-                    valid_moves = piece.get_valid_moves(board)
-                    if square in valid_moves:
-                        return True
-        return False
-    
+    def is_square_attacked(self, board, square):
+            for row in range(8):
+                for col in range(8):
+                    piece = board.board[row][col]
+                    # Bỏ qua quân King để tránh đệ quy vô hạn
+                    if piece and piece.color != self.color and not isinstance(piece, King):
+                        valid_moves = piece.get_valid_moves(board)
+                        if square in valid_moves:
+                            return True
+            return False
 
 class Queen(Pieces):
-    def get_valid_moves(self, board: Board):
+    def get_valid_moves(self, board, last_move=None):
+        from game.board import Board  # Import tại đây
         valid_moves = []
         x, y = self.position
         directions = [
@@ -132,9 +125,10 @@ class Queen(Pieces):
             while 0 <= nx < 8 and 0 <= ny < 8:
                 if board.board[nx][ny] is None:
                     valid_moves.append((nx, ny))
-                elif board.board[nx][ny] is not None and self.color != board.board[nx][ny].color:
-                    valid_moves.append((nx, ny))
-                    break
+                else:  # Gặp quân cờ (cùng màu hoặc khác màu)
+                    if self.color != board.board[nx][ny].color:  # Quân địch
+                        valid_moves.append((nx, ny))
+                    break  # Dừng lại khi gặp bất kỳ quân cờ nào
                 nx += dx
                 ny += dy
         return valid_moves
@@ -145,7 +139,8 @@ class Queen(Pieces):
         return "♕"
 
 class Rook(Pieces):
-    def get_valid_moves(self, board: Board):
+    def get_valid_moves(self, board, last_move=None):
+        from game.board import Board  # Import tại đây
         valid_moves = []
         x, y = self.position
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -154,9 +149,10 @@ class Rook(Pieces):
             while 0 <= nx < 8 and 0 <= ny < 8:
                 if board.board[nx][ny] is None:
                     valid_moves.append((nx, ny))
-                elif board.board[nx][ny] is not None and self.color != board.board[nx][ny].color:
-                    valid_moves.append((nx, ny))
-                    break
+                else:  # Gặp quân cờ (cùng màu hoặc khác màu)
+                    if self.color != board.board[nx][ny].color:  # Quân địch
+                        valid_moves.append((nx, ny))
+                    break  # Dừng lại khi gặp bất kỳ quân cờ nào
                 nx += dx
                 ny += dy
         return valid_moves
@@ -167,7 +163,8 @@ class Rook(Pieces):
         return "♖"
 
 class Bishop(Pieces):
-    def get_valid_moves(self, board: Board):
+    def get_valid_moves(self, board, last_move=None):
+        from game.board import Board  # Import tại đây
         valid_moves = []
         x, y = self.position
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
@@ -176,9 +173,10 @@ class Bishop(Pieces):
             while 0 <= nx < 8 and 0 <= ny < 8:
                 if board.board[nx][ny] is None:
                     valid_moves.append((nx, ny))
-                elif board.board[nx][ny] is not None and self.color != board.board[nx][ny].color:
-                    valid_moves.append((nx, ny))
-                    break
+                else:  # Gặp quân cờ (cùng màu hoặc khác màu)
+                    if self.color != board.board[nx][ny].color:  # Quân địch
+                        valid_moves.append((nx, ny))
+                    break  # Dừng lại khi gặp bất kỳ quân cờ nào
                 nx += dx
                 ny += dy
         return valid_moves
@@ -189,7 +187,8 @@ class Bishop(Pieces):
         return "♗"
 
 class Knight(Pieces):
-    def get_valid_moves(self, board: Board):
+    def get_valid_moves(self, board, last_move=None):
+        from game.board import Board  # Import tại đây
         valid_moves = []
         x, y = self.position
         jumps = [
@@ -209,43 +208,42 @@ class Knight(Pieces):
         return "♘"
 
 class Pawn(Pieces):
-    def get_valid_moves(self, board: Board, last_move=None):
+    def get_valid_moves(self, board, last_move=None):
+        from game.board import Board  # Import tại đây
         valid_moves = []
         x, y = self.position
-
-        # Xác định hướng và hàng đặc biệt dựa trên màu
         if self.color == "white":
-            direction = -1  # Trắng đi lên (giảm số hàng)
-            start_row = 6   # Hàng bắt đầu của trắng
-        else:  # self.color == "black"
-            direction = 1  # Đen đi xuống (tăng số hàng)
-            start_row = 1  # Hàng bắt đầu của đen
+            direction = -1
+            start_row = 6
+        else:
+            direction = 1
+            start_row = 1
 
-        # 1. Tiến một ô nếu không bị chặn
-        if 0 <= x + direction < 8 and board[x + direction][y] is None:
+        if 0 <= x + direction < 8 and board.board[x + direction][y] is None:
             valid_moves.append((x + direction, y))
-            # 2. Tiến hai ô nếu ở vị trí ban đầu và không bị chặn
-            if x == start_row and board[x + 2 * direction][y] is None:
+            if x == start_row and board.board[x + 2 * direction][y] is None:
                 valid_moves.append((x + 2 * direction, y))
 
-        # 3. Ăn chéo
-        for dy in [-1, 1]:  # Chéo trái và phải
+        for dy in [-1, 1]:
             new_x, new_y = x + direction, y + dy
             if 0 <= new_x < 8 and 0 <= new_y < 8:
-                target = board[new_x][new_y]
+                target = board.board[new_x][new_y]
                 if target is not None and target.color != self.color:
                     valid_moves.append((new_x, new_y))
 
-        # 4. Bắt chốt qua đường (en passant)
         if last_move:
             (prev_x, prev_y), (new_x, new_y), moved_piece = last_move
             if (isinstance(moved_piece, Pawn) and 
-                abs(prev_x - new_x) == 2 and  # Đối phương vừa đi 2 ô
-                new_x == x and abs(new_y - y) == 1):  # Ngang hàng và cạnh nhau
+                abs(prev_x - new_x) == 2 and
+                new_x == x and abs(new_y - y) == 1):
                 valid_moves.append((x + direction, new_y))
 
         return valid_moves
 
+
+    def __str__(self):
+        return "♟" if self.color == "white" else "♙"
+    
     # def move(self, new_position, board):
     #     """Di chuyển quân cờ và xử lý phong cấp."""
     #     x, y = new_position
@@ -266,6 +264,3 @@ class Pawn(Pieces):
     #         board[x][y] = self  # Di chuyển chốt bình thường
 
     #     self.position = [x, y]
-
-    def __str__(self):
-        return "♟" if self.color == "white" else "♙"
