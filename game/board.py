@@ -63,9 +63,6 @@ class Board:
         # Lấy quân cờ từ bàn cờ đã sao chép
         piece = temp_board.board[pre_x][pre_y]
         
-        # Lưu thông tin quân cờ trước khi di chuyển để thêm vào move_log
-        piece_info = (pre_x, pre_y, type(piece).__name__, piece.color)
-        
         # Di chuyển quân cờ trên bản sao
         piece.move((new_x, new_y), temp_board)
         

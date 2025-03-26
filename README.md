@@ -1,57 +1,133 @@
 # Chess Bot Game
 
-## Overview
-Chess Bot Game is a Python-based chess game that allows players to compete against AI bots of varying difficulty levels. The project is structured into several modules, each responsible for different aspects of the game, including bot algorithms, game logic, user interface, and testing.
+A Python-based chess game where you can play against AI bots with different difficulty levels. The game features both Pygame user interfaces.
 
-## Project Structure
-```
-chess_bot_game/
-├── bots/                     # Contains AI bot algorithms
-│   ├── __init__.py
-│   ├── base_bot.py           # Base class for all bots
-├── game/                     # Contains the main game logic
-│   ├── __init__.py
-│   ├── board.py              # Manages the game board and moves
-│   ├── pieces.py             # Manages chess pieces
-│   ├── move_generator.py      # Generates valid moves
-│   ├── evaluator.py          # Evaluates board positions
-│   ├── alpha_beta.py         # Implements Alpha-Beta Pruning
-├── ui/                       # User interface components
-│   ├── __init__.py
-│   ├── streamlit_ui.py       # Streamlit user interface
-│   ├── pygame_ui.py          # Pygame user interface
-├── assets/                   # Contains resources like images and sounds
-│   ├── chess_pieces/         # Images of chess pieces
-│   ├── sounds/               # Sound files for the game
-├── tests/                    # Contains test files
-│   ├── test_board.py         # Tests for board functionality
-│   ├── test_alpha_beta.py    # Tests for Alpha-Beta algorithm
-│   ├── test_bots.py          # Tests for AI bots
-├── main.py                   # Entry point to run the game
-├── requirements.txt          # List of required libraries
-└── README.md                 # Project documentation
-```
+## Features
+
+- Play chess against AI bots with 3 difficulty levels
+- Two user interface options: Pygame (graphical)
+- Smart AI using Alpha-Beta pruning algorithm
+- Beautiful chess piece graphics
+- Sound effects for moves and captures
+- Move validation and game state tracking
+- Support for both light and dark themes
+
+## Requirements
+
+- Python 3.8 or higher
+- Pygame
+- NumPy
 
 ## Installation
-To set up the project, clone the repository and install the required dependencies:
 
+1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd chess_bot_game
+git clone https://github.com/Giahung2111/ChessBot_AI.git
+```
+
+2. Install required packages:
+```bash
 pip install -r requirements.txt
 ```
 
-## Usage
-To run the game, execute the following command:
+## How to Play
 
+### Using Pygame Interface
+1. Run the game:
 ```bash
 python main.py
 ```
 
-You can choose to play against different AI bots by selecting the desired difficulty level in the user interface.
+2. Choose your color (white or black)
+3. Select bot difficulty level (1-3)
+4. Play the game using mouse clicks
+
+## Game Controls
+
+- Click on a piece to select it
+- Click on a valid square to move the piece
+- Press ESC to exit the game
+- Press R to reset the game
+
+## Bot Difficulty Levels
+
+1. **Easy (Level 1)**
+   - Uses simple evaluation
+   - Makes basic moves
+   - Good for beginners
+
+2. **Medium (Level 2)**
+   - Uses Alpha-Beta pruning
+   - Looks ahead 2 moves
+   - Balanced challenge
+
+3. **Hard (Level 3)**
+   - Advanced Alpha-Beta pruning
+   - Looks ahead 3 moves
+   - Challenging for experienced players
+
+## Project Structure
+
+```
+chess_bot_game/
+├── bots/                     # AI bot code
+│   ├── bot.py               # Main bot logic
+│   └── alpha_beta.py        # Alpha-Beta algorithm
+├── game/                    # Game logic
+│   ├── board.py            # Board management
+│   ├── pieces.py           # Chess pieces
+│   └── move_generator.py   # Move validation
+│   └── alpha_beta.py        # Minimax algorithm
+├── ui/                      # User interfaces
+│   ├── pygame_ui.py        # Pygame interface
+├── assets/                  # Game resources
+│   ├── chess_pieces/       # Piece images
+│   └── sounds/             # Sound effects
+└── main.py                 # Game entry point
+```
+
+## How the AI Works
+
+The bot uses the Alpha-Beta pruning algorithm to:
+1. Look ahead several moves
+2. Evaluate board positions
+3. Choose the best move based on:
+   - Piece values
+   - Position control
+   - King safety
+   - Material advantage
 
 ## Contributing
-Contributions are welcome! Please feel free to submit a pull request or open an issue for any suggestions or improvements.
+
+Feel free to:
+1. Fork the repository
+2. Create a new branch
+3. Make your changes
+4. Submit a pull request
+
+## Troubleshooting
+
+If you experience issues:
+1. Make sure all requirements are installed
+2. Check if your Python version is compatible
+3. Verify that all asset files are present
+4. Try running with a lower bot difficulty level
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for more details.
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Credits
+
+- Chess piece images: [Source]
+- Sound effects: [Source]
+- Alpha-Beta algorithm implementation based on chess programming principles
+
+## Support
+
+If you need help or have questions:
+1. Check the documentation
+2. Open an issue
+3. Contact the maintainers
+
+Enjoy playing Chess Bot Game!

@@ -1,15 +1,34 @@
 from game.alpha_beta import AlphaBeta
+import time
 
 class Bot:
     def __init__(self, level, bot_color):
         # Chiều cao duyệt cây (Tương ứng với độ khó của bot)
         self.level = level
         self.color = bot_color
+        # Giới hạn thời gian tối đa cho mỗi nước đi (giây)
+        self.time_limit = 5.0
 
     def make_move(self, board):
         try:
             ab = AlphaBeta(self.level, self.color)
-            best_move, score = ab.find_best_move(board)
+            
+            # Bắt đầu đếm thời gian
+            start_time = time.time()
+            
+            # Tìm nước đi tốt nhất với giới hạn thời gian
+            best_move = None
+            score = 0
+            try:
+                best_move, score = ab.find_best_move(board)
+            except TimeoutError:
+                print("Bot hết thời gian tính toán, sử dụng nước đi tốt nhất tìm được")
+            
+            # Kiểm tra thời gian đã dùng
+            elapsed_time = time.time() - start_time
+            if elapsed_time > self.time_limit:
+                print(f"Bot đã dùng {elapsed_time:.2f} giây để tính toán")
+            
             print(f"Nước đi tốt nhất: {best_move}, Điểm: {score}")
             
             if best_move is None:
