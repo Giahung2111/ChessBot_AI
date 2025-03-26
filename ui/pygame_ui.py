@@ -126,6 +126,8 @@ def run_pygame_ui(level=3, bot_color="black"):
         # Chỉ cho bot đi khi đến lượt và người chơi đã hoàn thành nước đi
         if board.turn == bot.color and selected_piece is None:
             print(f"Lượt của bot ({bot_color})")  # Debug
+            print("Trạng thái bàn cờ trước khi bot di chuyển:")
+            print(board)
             bot.make_move(board)
             board.switch_turns()
             # Vẽ lại sau khi bot di chuyển

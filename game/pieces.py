@@ -111,6 +111,27 @@ class King(Pieces):
                             return True
             return False
 
+    def move(self, new_position, board):
+        from game.board import Board
+        pre_x, pre_y = self.position
+        new_x, new_y = new_position
+        if abs(new_y - pre_y) == 2:
+            if new_y > pre_y:  # Nhập thành bên phải (h)
+                rook = board.board[pre_x][7]
+                if rook and isinstance(rook, Rook):  # Kiểm tra rook tồn tại và là quân xe
+                    board.board[pre_x][5] = rook
+                    board.board[pre_x][7] = None
+                    rook.position = (pre_x, 5)
+            else:  # Nhập thành bên trái (a)
+                rook = board.board[pre_x][0]
+                if rook and isinstance(rook, Rook):  # Kiểm tra rook tồn tại và là quân xe
+                    board.board[pre_x][3] = rook
+                    board.board[pre_x][0] = None
+                    rook.position = (pre_x, 3)
+        board.board[new_x][new_y] = self
+        board.board[pre_x][pre_y] = None
+        self.position = tuple(new_position)
+
 class Queen(Pieces):
     def get_valid_moves(self, board, last_move=None):
         from game.board import Board  # Import tại đây
@@ -244,23 +265,17 @@ class Pawn(Pieces):
     def __str__(self):
         return "♟" if self.color == "white" else "♙"
     
-    # def move(self, new_position, board):
-    #     """Di chuyển quân cờ và xử lý phong cấp."""
-    #     x, y = new_position
-
-    #     # Nếu đạt đến hàng phong cấp, biến thành quân Hậu (mặc định)
-    #     if x == (0 if self.color == "white" else 7):
-    #         print(f"Pawn tại {self.position} đã phong cấp! Chọn quân mới (Q/R/B/N):")
-    #         choice = input().upper()
-    #         if choice == "R":
-    #             board[x][y] = Rook([x, y])
-    #         elif choice == "B":
-    #             board[x][y] = Bishop([x, y])
-    #         elif choice == "N":
-    #             board[x][y] = Knight([x, y])
-    #         else:
-    #             board[x][y] = Queen([x, y])  # Mặc định phong cấp thành Hậu
-    #     else:
-    #         board[x][y] = self  # Di chuyển chốt bình thường
-
-    #     self.position = [x, y]
+    def move(self, new_position, board):
+        from game.board import Board
+        pre_x, pre_y = self.position
+        new_x, new_y = new_position
+        # Kiểm tra bắt qua đường
+        if abs(new_y - pre_y) == 1 and board.board[new_x][new_y] is None:
+            direction = -1 if self.color == "white" else 1
+            board.board[pre_x][new_y] = None  # Xóa quân tốt bị bắt
+        board.board[new_x][new_y] = self
+        board.board[pre_x][pre_y] = None
+        self.position = tuple(new_position)
+        # Xử lý phong cấp
+        if (self.color == "white" and new_x == 0) or (self.color == "black" and new_x == 7):
+            board.board[new_x][new_y] = Queen((new_x, new_y), self.color)
