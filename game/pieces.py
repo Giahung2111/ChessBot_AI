@@ -18,8 +18,12 @@ class Pieces:
         from game.board import Board  # Import tại đây
         pre_x, pre_y = self.position
         new_x, new_y = new_position
+        
+        # Cập nhật trạng thái bàn cờ
         board.board[new_x][new_y] = self
         board.board[pre_x][pre_y] = None
+        
+        # Cập nhật vị trí của quân cờ
         self.position = tuple(new_position)
 
 class King(Pieces):
@@ -185,19 +189,20 @@ class Rook(Pieces):
 
 class Bishop(Pieces):
     def get_valid_moves(self, board, last_move=None):
-        from game.board import Board  # Import tại đây
+        from game.board import Board  # Import tại đây để tránh import cycle
         valid_moves = []
-        x, y = self.position
-        directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+        directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]  # Hướng di chuyển của tượng
         for dx, dy in directions:
-            nx, ny = x + dx, y + dy
+            nx, ny = self.position[0] + dx, self.position[1] + dy
             while 0 <= nx < 8 and 0 <= ny < 8:
-                if board.board[nx][ny] is None:
+                target = board.board[nx][ny]
+                if target is None:  # Ô trống
                     valid_moves.append((nx, ny))
-                else:  # Gặp quân cờ (cùng màu hoặc khác màu)
-                    if self.color != board.board[nx][ny].color:  # Quân địch
-                        valid_moves.append((nx, ny))
-                    break  # Dừng lại khi gặp bất kỳ quân cờ nào
+                elif target.color != self.color:  # Quân đối phương
+                    valid_moves.append((nx, ny))
+                    break  # Dừng lại sau khi ăn quân đối phương
+                else:  # Quân cùng màu
+                    break  # Dừng lại khi gặp quân cùng màu
                 nx += dx
                 ny += dy
         return valid_moves

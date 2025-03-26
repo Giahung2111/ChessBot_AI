@@ -8,7 +8,7 @@ from game.pieces import King, Knight, Queen, Pawn, Rook, Bishop
 # 2. Mô phỏng trạng thái mới sau khi đi quân bằng board.generate_state_from_a_move(move).
 # 3. Gọi minimax để tính giá trị nước đi đó.
 # 4. Nếu giá trị này lớn hơn giá trị tốt nhất trước đó, cập nhật best_move và best_value.
-# 5. Cập nhật alpha để tối ưu cắt tỉa Alpha-Beta.
+# 5. Cập nhật alpha, beta để tối ưu cắt tỉa Alpha-Beta.
 
 class AlphaBeta():
     def __init__(self, depth, bot_color):
@@ -147,15 +147,22 @@ class AlphaBeta():
     # 2. Mobility (Điểm cơ động)
     def evaluate_mobility_score(self, board: Board, color):
         score = 0
-        # Kiểm tra xem board.turn có khớp với color không
-        if board.turn == color:
-            legal_move_number = len(board.get_legal_moves())
-        # Nếu không khớp, cần chuyển lượt tạm thời để lấy nước đi của bên color
-        else:
-            board.switch_turns()
-            legal_move_number = len(board.get_legal_moves())
-            board.switch_turns()
-        score = legal_move_number * 0.05
+        try:
+            # Tạo bản sao sâu của bàn cờ
+            temp_board = deepcopy(board)
+            
+            # Đảm bảo lượt chơi là của màu cần đánh giá
+            if temp_board.turn != color:
+                temp_board.switch_turns()
+                
+            # Đếm số nước đi hợp lệ
+            legal_move_number = len(temp_board.get_legal_moves())
+            score = legal_move_number * 0.05
+        except Exception as e:
+            # Xử lý ngoại lệ - trả về giá trị mặc định nếu có lỗi
+            print(f"Lỗi khi đánh giá tính cơ động: {e}")
+            score = 0
+            
         return score
 
     # 3. King safety (Điểm an toàn của vua)

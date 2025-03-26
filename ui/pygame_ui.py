@@ -61,13 +61,13 @@ def handle_mouse_click(pos, board, selected_piece, selected_pos):
             print(f"Đã chọn quân cờ: {piece} tại ({row}, {col})")  # Debug
             return piece, (row, col)
     else:
-        move = (selected_pos, (row, col))
-        legal_moves = board.get_legal_moves()
-        if move in legal_moves:
+        move = (selected_pos, (row, col)) # Nước đi của player
+        legal_moves = board.get_legal_moves() # Các nước đi hợp lệ
+        if move in legal_moves: # Kiểm tra xem nước đi của người dùng có hợp lệ hay không ?
             print(f"Di chuyển từ {selected_pos} đến ({row}, {col})")  # Debug
             selected_piece.move((row, col), board)
-            board.move_log.append((selected_pos, (row, col), selected_piece))
-            board.switch_turns()
+            board.move_log.append((selected_pos, (row, col), selected_piece)) # Thêm vào lịch sử
+            board.switch_turns() # Đổi lượt
             return None, None
         else:
             print(f"Nước đi không hợp lệ: {move}")  # Debug
@@ -79,24 +79,26 @@ def check_game_over(board):
     legal_moves = board.get_legal_moves()
     if len(legal_moves) == 0:
         if board.is_in_check(board.turn):
-            winner = "Trắng" if board.turn == "black" else "Đen"
-            return f"Chiếu hết! {winner} thắng!"
+            winner = "White" if board.turn == "black" else "Black" # Trắng sẽ thắng nếu đen hết nước đi hợp lệ
+            return f"Checkmate! {winner} win!"
         else:
-            return "Hòa! Bế tắc!"
+            return "Draw! Stalemate!"
     return None
 
 # Hàm vẽ thông tin game
 font = pygame.font.Font(None, 36)
 def draw_game_info(board):
-    turn_text = font.render(f"Lượt của: {board.turn}", True, (0, 0, 0))
+    turn_text = font.render(f"This is {board.turn}'s turn", True, (0, 0, 0))
     screen.blit(turn_text, (10, 10))
     if board.is_in_check(board.turn):
-        check_text = font.render("Vua đang bị chiếu!", True, (255, 0, 0))
+        check_text = font.render("The King is in check", True, (255, 0, 0))
         screen.blit(check_text, (10, 50))
     game_over = check_game_over(board)
     if game_over:
         over_text = font.render(game_over, True, (0, 0, 0))
         screen.blit(over_text, (10, 90))
+        return True  # Thêm giá trị trả về để biết game kết thúc
+    return False
 
 def run_pygame_ui(level=3, bot_color="black"):
     # Khởi tạo board và bot
@@ -106,25 +108,30 @@ def run_pygame_ui(level=3, bot_color="black"):
     # Biến theo dõi quân cờ được chọn
     selected_piece = None
     selected_pos = None
+    
+    # Biến kiểm tra game đã kết thúc chưa
+    game_over = False
 
     # Vòng lặp chính
     running = True
     clock = pygame.time.Clock()  # Thêm clock để kiểm soát FPS
     while running:
+        ## Lượt đi của người chơi
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
-            elif event.type == MOUSEBUTTONDOWN:
+            elif event.type == MOUSEBUTTONDOWN and not game_over:
                 selected_piece, selected_pos = handle_mouse_click(event.pos, board, selected_piece, selected_pos)
                 # Vẽ lại ngay sau khi người chơi di chuyển
                 if selected_piece is None and selected_pos is None:
                     draw_board()
                     draw_pieces(board)
-                    draw_game_info(board)
+                    game_over = draw_game_info(board)
                     pygame.display.flip()
 
-        # Chỉ cho bot đi khi đến lượt và người chơi đã hoàn thành nước đi
-        if board.turn == bot.color and selected_piece is None:
+        ## Lượt đi của bot
+        # Chỉ cho bot đi khi đến lượt, người chơi đã hoàn thành nước đi và game chưa kết thúc
+        if board.turn == bot.color and selected_piece is None and not game_over:
             print(f"Lượt của bot ({bot_color})")  # Debug
             print("Trạng thái bàn cờ trước khi bot di chuyển:")
             print(board)
@@ -133,13 +140,13 @@ def run_pygame_ui(level=3, bot_color="black"):
             # Vẽ lại sau khi bot di chuyển
             draw_board()
             draw_pieces(board)
-            draw_game_info(board)
+            game_over = draw_game_info(board)
             pygame.display.flip()
 
         # Vẽ lại giao diện
         draw_board()
         draw_pieces(board)
-        draw_game_info(board)
+        game_over = draw_game_info(board)
         pygame.display.flip()
         clock.tick(60)  # Giới hạn 60 FPS
 

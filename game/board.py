@@ -59,8 +59,22 @@ class Board:
         temp_board = deepcopy(self)  # Tạo bản sao của bàn cờ
         pre_x, pre_y = move[0]
         new_x, new_y = move[1]
+        
+        # Lấy quân cờ từ bàn cờ đã sao chép
         piece = temp_board.board[pre_x][pre_y]
-        piece.move((new_x, new_y), temp_board)  # Di chuyển trên bản sao
+        
+        # Lưu thông tin quân cờ trước khi di chuyển để thêm vào move_log
+        piece_info = (pre_x, pre_y, type(piece).__name__, piece.color)
+        
+        # Di chuyển quân cờ trên bản sao
+        piece.move((new_x, new_y), temp_board)
+        
+        # Thêm vào move_log của bản sao
+        temp_board.move_log.append((move[0], move[1], piece))
+        
+        # Đổi lượt chơi trên bản sao
+        temp_board.switch_turns()
+        
         return temp_board
     
     # Tạo tất cả trạng thái có thể xảy ra
