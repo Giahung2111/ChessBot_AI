@@ -1,3 +1,4 @@
+# board.py
 from game.pieces import King, Knight, Queen, Pawn, Rook, Bishop
 from game.move_generator import MoveGenerator
 from copy import deepcopy

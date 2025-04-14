@@ -1,7 +1,9 @@
+#pygame_ui.py
 import pygame
 from pygame.locals import *
 from game.board import Board
 from bots.bot import Bot
+import time
 
 # Khởi tạo Pygame
 pygame.init()
@@ -149,5 +151,56 @@ def run_pygame_ui(level=3, bot_color="black"):
         game_over = draw_game_info(board)
         pygame.display.flip()
         clock.tick(60)  # Giới hạn 60 FPS
+
+    pygame.quit()
+
+def watch_bots(bot_level=2, bot_color="black", random_bot_level=0):
+    board = Board()
+    bot1 = Bot(level=bot_level, bot_color=bot_color)  # Bot chính
+    bot2 = Bot(level=random_bot_level, bot_color="white" if bot_color == "black" else "black")  # Bot ngẫu nhiên
+
+    game_over = False
+    running = True
+    clock = pygame.time.Clock()
+    
+    # Vẽ bàn cờ ban đầu
+    draw_board()
+    draw_pieces(board)
+    draw_game_info(board)
+    pygame.display.flip()
+
+    while running:
+        # Xử lý sự kiện
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                running = False
+
+        if not game_over:
+            # Lượt của bot1
+            if board.turn == bot1.color:
+                print(f"Lượt của bot chính ({bot1.color})")
+                bot1.make_move(board)
+                board.switch_turns()
+            # Lượt của bot2
+            elif board.turn == bot2.color:
+                print(f"Lượt của bot ngẫu nhiên ({bot2.color})")
+                bot2.make_move(board)
+                board.switch_turns()
+
+            # Cập nhật giao diện sau mỗi nước đi
+            draw_board()
+            draw_pieces(board)
+            game_over = draw_game_info(board)
+            pygame.display.flip()
+            clock.tick(2)  # Giới hạn 2 FPS để xem rõ từng nước đi (khoảng 0.5 giây mỗi khung)
+
+        # Nếu game kết thúc, vẫn vẽ giao diện để hiển thị kết quả
+        if game_over:
+            draw_board()
+            draw_pieces(board)
+            draw_game_info(board)
+            pygame.display.flip()
+
+        clock.tick(60)  # Giữ tốc độ 60 FPS khi không có nước đi
 
     pygame.quit()

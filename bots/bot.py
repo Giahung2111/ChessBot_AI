@@ -1,3 +1,4 @@
+# bot.py
 from game.alpha_beta import AlphaBeta
 import time
 
